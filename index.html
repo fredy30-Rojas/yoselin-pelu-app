@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#b5566a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Yoselin Pelu">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Peluquería · Gestión</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="logo_180.png">
+<link rel="manifest" href="manifest.json">
+<style>
+  :root {
+    --fondo: #f7f4f0;
+    --panel: #ffffff;
+    --tinta: #2b2320;
+    --suave: #7a6d66;
+    --linea: #e6ded7;
+    --acento: #b5566a;
+    --acento-suave: #f6e6ea;
+    --ok: #2f7d59;
+    --ok-suave: #e3f2ea;
+    --aviso: #a4551f;
+    --aviso-suave: #fbeee2;
+    --entrada: #ffffff;
+    --hover: #fbf8f5;
+    --ok-linea: #bfe0cf;
+    --aviso-linea: #eccfb4;
+  }
+  :root[data-tema="oscuro"] {
+    --fondo: #17130f;
+    --panel: #221c18;
+    --tinta: #f2eae3;
+    --suave: #a99c93;
+    --linea: #3a322c;
+    --acento: #e08a9e;
+    --acento-suave: #3a2730;
+    --ok: #6fd3a2;
+    --ok-suave: #1f3a2d;
+    --aviso: #f0b183;
+    --aviso-suave: #3a2a1e;
+    --entrada: #191512;
+    --hover: #2b2420;
+    --ok-linea: #2f5a45;
+    --aviso-linea: #5a4530;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    background: var(--fondo);
+    color: var(--tinta);
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    display: flex; flex-direction: column;
+  }
+  header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--linea);
+    padding: 12px 18px;
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 20px; margin: 0; letter-spacing: -.2px; }
+  header h1 span { color: var(--acento); }
+  nav { display: flex; gap: 6px; margin-left: auto; flex-wrap: wrap; }
+  nav button {
+    background: transparent; border: 1px solid transparent; color: var(--suave);
+    padding: 9px 14px; border-radius: 10px; font-size: 15px; cursor: pointer;
+  }
+  nav button:hover { background: var(--acento-suave); color: var(--tinta); }
+  nav button.activo { background: var(--acento); color: #fff; }
+  main { flex: 1; overflow: auto; padding: 18px; }
+  .aviso-copia {
+    background: var(--aviso-suave); color: var(--aviso); border: 1px solid var(--aviso-linea);
+    padding: 10px 14px; border-radius: 10px; margin-bottom: 14px; font-size: 15px;
+    display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  }
+  .barra { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+  .barra .fecha { font-size: 18px; font-weight: 600; min-width: 230px; }
+  .crecer { margin-left: auto; }
+  button.btn {
+    background: var(--acento); color: #fff; border: 0; padding: 11px 16px;
+    border-radius: 10px; font-size: 15px; cursor: pointer;
+  }
+  button.btn:hover { filter: brightness(.94); }
+  button.btn2 {
+    background: var(--panel); color: var(--tinta); border: 1px solid var(--linea);
+    padding: 10px 14px; border-radius: 10px; font-size: 15px; cursor: pointer;
+  }
+  button.btn2:hover { background: var(--hover); }
+  button.btn3 {
+    background: transparent; border: 1px solid var(--linea); color: var(--suave);
+    padding: 7px 11px; border-radius: 9px; font-size: 14px; cursor: pointer;
+  }
+  button.btn3:hover { background: var(--acento-suave); color: var(--tinta); }
+  .panel { background: var(--panel); border: 1px solid var(--linea); border-radius: 14px; padding: 16px; }
+  .lista { display: flex; flex-direction: column; gap: 10px; }
+  .cita {
+    display: grid; grid-template-columns: 78px 1fr auto; gap: 12px; align-items: center;
+    border: 1px solid var(--linea); border-radius: 12px; padding: 12px 14px; background: var(--panel);
+  }
+  .cita.hecho { border-color: var(--ok-linea); background: var(--ok-suave); }
+  .cita.cancelado { opacity: .55; }
+  .cita .hora { font-size: 20px; font-weight: 700; }
+  .cita .quien { font-weight: 600; }
+  .cita .detalle { color: var(--suave); font-size: 14px; margin-top: 2px; }
+  .cita .precio { font-weight: 700; white-space: nowrap; }
+  .cita .acciones { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .vacio { color: var(--suave); padding: 30px; text-align: center; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--linea); font-size: 15px; }
+  th { color: var(--suave); font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .4px; }
+  .fila-dato { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--linea); }
+  .fila-dato b { font-variant-numeric: tabular-nums; }
+  .grande { font-size: 34px; font-weight: 800; letter-spacing: -.5px; }
+  .rejilla { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+  .tarjeta { background: var(--panel); border: 1px solid var(--linea); border-radius: 14px; padding: 16px; }
+  .tarjeta h3 { margin: 0 0 10px; font-size: 14px; text-transform: uppercase; letter-spacing: .5px; color: var(--suave); }
+  dialog {
+    border: 0; border-radius: 16px; padding: 0; width: min(560px, 94vw);
+    box-shadow: 0 24px 60px rgba(40, 25, 20, .25);
+  }
+  dialog::backdrop { background: rgba(40, 25, 20, .35); }
+  dialog form { padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+  dialog h2 { margin: 0 0 4px; font-size: 19px; }
+  label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--suave); }
+  input, select, textarea {
+    font: inherit; padding: 10px 12px; border: 1px solid var(--linea); border-radius: 10px;
+    background: var(--entrada); color: var(--tinta); width: 100%;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--acento-suave); border-color: var(--acento); }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pie-form { display: flex; gap: 10px; justify-content: flex-end; margin-top: 6px; flex-wrap: wrap; }
+  .etiqueta {
+    font-size: 12px; padding: 3px 8px; border-radius: 999px; background: var(--acento-suave); color: var(--acento);
+    font-weight: 600; text-transform: uppercase; letter-spacing: .3px;
+  }
+  .etiqueta.ok { background: var(--ok-suave); color: var(--ok); }
+  small { color: var(--suave); }
+  @media (max-width: 720px) {
+    .cita { grid-template-columns: 62px 1fr; }
+    .cita .acciones { grid-column: 1 / -1; justify-content: flex-start; }
+    .dos { grid-template-columns: 1fr; }
+  }
+  button.tema {
+    background: transparent; border: 1px solid var(--linea); color: var(--suave);
+    padding: 8px 12px; border-radius: 10px; font-size: 14px; cursor: pointer;
+  }
+  button.tema:hover { background: var(--acento-suave); color: var(--tinta); }
+  @media print {
+    header, nav, .barra, .acciones, .aviso-copia, button { display: none !important; }
+    body { background: #fff; }
+  }
+</style>
+<script>
+  try {
+    if (localStorage.getItem("peluqueria-tema") === "oscuro") {
+      document.documentElement.setAttribute("data-tema", "oscuro");
+    }
+  } catch (e) {}
+</script>
+</head>
+<body>
+<header>
+  <h1 id="titulo-salon">Peluquería <span>· gestión</span></h1>
+  <nav>
+    <button data-tab="agenda" class="activo">Agenda</button>
+    <button data-tab="clientes">Clientes</button>
+    <button data-tab="servicios">Servicios</button>
+    <button data-tab="tienda">Tienda</button>
+    <button data-tab="caja">Caja</button>
+    <button data-tab="datos">Salón</button>
+    <button type="button" id="boton-tema" class="tema" title="Cambiar entre claro y oscuro">Modo oscuro</button>
+  </nav>
+</header>
+<main id="vista"></main>
+
+<dialog id="dialogo"><form method="dialog" id="formulario"></form></dialog>
+
+<script>
+"use strict";
+
+/* ---------- almacén ---------- */
+var CLAVE = "peluqueria_datos_v1";
+var datos = null;
+
+function nuevoId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function contactoInicial() {
+  return {
+    web: "https://yoselinmagiaycolor.com",
+    reservas: "https://yoselinmagiaycolor.com/reservas",
+    correo: "magiacolorrubi@gmail.com",
+    telefono: "935 88 76 86",
+    direccion: "Calle Sabadell 53, 08191 Rubí (Barcelona)"
+  };
+}
+
+function datosIniciales() {
+  return {
+    version: 1,
+    salon: "Yoselin Magia y Color",
+    contacto: contactoInicial(),
+    servicios: [
+      { id: nuevoId(), nombre: "Corte mujer", precio: 18, minutos: 45 },
+      { id: nuevoId(), nombre: "Corte hombre", precio: 14, minutos: 30 },
+      { id: nuevoId(), nombre: "Corte niño", precio: 11, minutos: 25 },
+      { id: nuevoId(), nombre: "Tinte", precio: 35, minutos: 90 },
+      { id: nuevoId(), nombre: "Mechas", precio: 45, minutos: 120 },
+      { id: nuevoId(), nombre: "Peinado", precio: 20, minutos: 45 },
+      { id: nuevoId(), nombre: "Lavado y secado", precio: 10, minutos: 30 }
+    ],
+    clientes: [],
+    citas: [],
+    cobros: [],
+    productos: [],
+    ultimaCopia: ""
+  };
+}
+
+function cargar() {
+  try {
+    var texto = localStorage.getItem(CLAVE);
+    datos = texto ? JSON.parse(texto) : datosIniciales();
+    if (!datos || !Array.isArray(datos.citas)) datos = datosIniciales();
+  } catch (e) {
+    datos = datosIniciales();
+  }
+  if (!datos.servicios || !datos.servicios.length) datos.servicios = datosIniciales().servicios;
+  if (!datos.clientes) datos.clientes = [];
+  if (!datos.citas) datos.citas = [];
+  if (!datos.contacto) datos.contacto = contactoInicial();
+  if (!datos.salon || datos.salon === "Peluquería") datos.salon = "Yoselin Magia y Color";
+  if (!Array.isArray(datos.cobros)) datos.cobros = [];
+  if (!Array.isArray(datos.productos)) datos.productos = [];
+  if (!datos.version || datos.version < 2) {
+    // Las citas ya cobradas antes del libro de cobros pasan a ser cobros.
+    datos.citas.forEach(function (c) {
+      if (c.estado !== "hecho") return;
+      var ya = datos.cobros.filter(function (x) { return x.citaId === c.id; }).length;
+      if (ya) return;
+      datos.cobros.push({
+        id: nuevoId(), fecha: c.fecha, hora: c.hora || "", clienteId: c.clienteId || "",
+        clienteNombre: c.clienteNombre || "", concepto: c.servicioNombre || "Servicio",
+        tipo: "servicio", importe: Number(c.precio) || 0, pago: c.pago || "efectivo",
+        citaId: c.id, pedidoId: "", origen: "cita"
+      });
+    });
+    datos.version = 2;
+    guardar();
+  }
+}
+
+function guardar() {
+  try {
+    localStorage.setItem(CLAVE, JSON.stringify(datos));
+  } catch (e) {
+    alert("No se pudo guardar. El navegador puede estar sin espacio.");
+  }
+}
+
+/* ---------- utilidades ---------- */
+function esc(t) {
+  return String(t == null ? "" : t)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function euros(n) {
+  var v = Number(n) || 0;
+  return v.toFixed(2).replace(".", ",") + " €";
+}
+
+function hoyISO() {
+  var d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+function fechaLarga(iso) {
+  var p = iso.split("-");
+  var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  var dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  var meses = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"];
+  return dias[d.getDay()] + " " + d.getDate() + " de " + meses[d.getMonth()] + " de " + d.getFullYear();
+}
+
+function moverDia(iso, n) {
+  var p = iso.split("-");
+  var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  d.setDate(d.getDate() + n);
+  return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+}
+
+function servicioPorId(id) {
+  for (var i = 0; i < datos.servicios.length; i++) if (datos.servicios[i].id === id) return datos.servicios[i];
+  return null;
+}
+
+function clientePorId(id) {
+  for (var i = 0; i < datos.clientes.length; i++) if (datos.clientes[i].id === id) return datos.clientes[i];
+  return null;
+}
+
+function citasDelDia(iso) {
+  return datos.citas.filter(function (c) { return c.fecha === iso; })
+    .sort(function (a, b) { return (a.hora || "").localeCompare(b.hora || ""); });
+}
+
+/* ---------- libro de cobros ---------- */
+function cobrosDelDia(iso) {
+  return (datos.cobros || []).filter(function (c) { return c.fecha === iso; })
+    .sort(function (a, b) { return (b.hora || "").localeCompare(a.hora || ""); });
+}
+
+function cobroDeCita(citaId) {
+  return (datos.cobros || []).filter(function (c) { return c.citaId === citaId; })[0] || null;
+}
+function cobroDePedido(pedidoId) {
+  return (datos.cobros || []).filter(function (c) { return c.pedidoId === pedidoId; })[0] || null;
+}
+
+function registrarCobro(c) {
+  if (!datos.cobros) datos.cobros = [];
+  var cobro = {
+    id: nuevoId(),
+    fecha: c.fecha || hoyISO(),
+    hora: c.hora || new Date().toTimeString().slice(0, 5),
+    clienteId: c.clienteId || "",
+    clienteNombre: c.clienteNombre || "",
+    concepto: c.concepto || "Cobro",
+    tipo: c.tipo || "servicio",
+    importe: Number(c.importe) || 0,
+    pago: c.pago || "efectivo",
+    citaId: c.citaId || "",
+    pedidoId: c.pedidoId || "",
+    origen: c.origen || "manual"
+  };
+  datos.cobros.push(cobro);
+  return cobro;
+}
+
+function cobrarCita(c) {
+  if (!c) return;
+  c.estado = "hecho";
+  if (!c.pago) c.pago = "efectivo";
+  if (!cobroDeCita(c.id)) {
+    registrarCobro({
+      fecha: c.fecha, hora: c.hora, clienteId: c.clienteId, clienteNombre: c.clienteNombre,
+      concepto: c.servicioNombre || "Servicio", tipo: "servicio", importe: c.precio,
+      pago: c.pago, citaId: c.id, origen: "cita"
+    });
+  }
+  guardar();
+  pintar();
+}
+
+function productoPorId(id) {
+  for (var i = 0; i < (datos.productos || []).length; i++) if (datos.productos[i].id === id) return datos.productos[i];
+  return null;
+}
+
+function fechaCorta(iso) {
+  var p = iso.split("-");
+  var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  var dias = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  return dias[d.getDay()] + " " + d.getDate();
+}
+
+function proximaCita(desdeIso) {
+  var hoy = hoyISO();
+  var base = desdeIso && desdeIso > hoy ? desdeIso : hoy;
+  var lista = datos.citas.filter(function (c) {
+    return c.fecha && c.fecha >= base && c.estado !== "cancelado";
+  }).sort(function (a, b) {
+    return (String(a.fecha) + String(a.hora || "")).localeCompare(String(b.fecha) + String(b.hora || ""));
+  });
+  return lista.length ? lista[0] : null;
+}
+
+/* ---------- estado de la pantalla ---------- */
+var vista = "agenda";
+var CLAVE_DIA = "peluqueria-dia";
+var dia = hoyISO();
+try {
+  var diaGuardado = localStorage.getItem(CLAVE_DIA);
+  if (diaGuardado && /^\d{4}-\d{2}-\d{2}$/.test(diaGuardado)) dia = diaGuardado;
+} catch (e) {}
+
+
+/* ---------- agenda compartida con Google (aplicacion web del salon) ---------- */
+var AGENDA_URL = "https://script.google.com/macros/s/AKfycbzAjiTVp5Kpsoel0PsJoQd_T3xwjq-GYZAP6Z8q26m_vWByfAgpmlDTkNJoIrreiaqmyg/exec";
+var AGENDA_CLAVE = "luz-pelu-2026";
+var eventosGoogle = {};
+var cargandoGoogle = {};
+var errorGoogle = {};
+
+function pedirGoogle(fecha) {
+  if (!fecha || cargandoGoogle[fecha]) return;
+  cargandoGoogle[fecha] = true;
+  errorGoogle[fecha] = "";
+  fetch(AGENDA_URL + "?action=listar&k=" + encodeURIComponent(AGENDA_CLAVE) + "&desde=" + fecha + "&hasta=" + fecha)
+    .then(function (r) { return r.json(); })
+    .then(function (r) {
+      cargandoGoogle[fecha] = false;
+      if (r && r.success) eventosGoogle[fecha] = r.citas || [];
+      else errorGoogle[fecha] = (r && r.error) || "La agenda de Google no contesto.";
+      if (vista === "agenda" && dia === fecha) pintar();
+    })
+    .catch(function () {
+      cargandoGoogle[fecha] = false;
+      errorGoogle[fecha] = "Sin conexion con la agenda de Google.";
+      if (vista === "agenda" && dia === fecha) pintar();
+    });
+}
+
+function pedirOcupacion(fecha, forzar) {
+  if (forzar) delete eventosGoogle[fecha];
+  if (eventosGoogle[fecha] && !forzar) return;
+  pedirGoogle(fecha);
+}
+
+function partirTitulo(t) {
+  t = String(t || "");
+  var i = t.indexOf(" - ");
+  if (i < 0) return { nombre: "", servicio: t };
+  var a = t.slice(0, i), b = t.slice(i + 3);
+  if (/^cita/i.test(a)) return { nombre: b, servicio: a };
+  return { nombre: a, servicio: b };
+}
+
+function citaDelPrograma(googleId) {
+  return datos.citas.filter(function (c) { return c.googleId === googleId; })[0];
+}
+
+function panelGoogle(fecha) {
+  var evs = eventosGoogle[fecha];
+  var cabecera = '<div class="panel" style="margin-top:14px"><h3>Agenda de Google del salon</h3>';
+  if (!evs) {
+    return cabecera + '<div class="detalle">' + esc(errorGoogle[fecha] || "Consultando la agenda de Google...") + '</div>' +
+      '<button class="btn3" data-accion="actualizar-web" style="margin-top:8px">Consultar ahora</button></div>';
+  }
+  if (!evs.length) {
+    return cabecera + '<div class="detalle">Google no tiene nada apuntado este dia.</div>' +
+      '<button class="btn3" data-accion="actualizar-web" style="margin-top:8px">Actualizar</button></div>';
+  }
+  var filas = evs.map(function (e) {
+    var cp = citaDelPrograma(e.id);
+    var enPrograma = !!cp;
+    var pt = partirTitulo(e.titulo);
+    var nombre = e.tel ? e.nombre : pt.nombre;
+    var servicio = e.tel ? e.servicio : pt.servicio;
+    var btnCobrar = (cp && cp.estado !== "hecho")
+      ? '<button class="btn3" data-accion="cobrar" data-id="' + esc(cp.id) + '">Cobrar</button>'
+      : "";
+    return '<div class="fila-dato"><span><b>' + esc(e.hora) + '</b> &middot; ' + esc(nombre || "(sin nombre)") +
+      (servicio ? " &middot; " + esc(servicio) : "") + (e.tel ? " &middot; " + esc(e.tel) : "") +
+      (enPrograma ? ' <span class="etiqueta ok">en el programa</span>' : "") + '</span>' +
+      (enPrograma ? "" : '<button class="btn3" data-accion="g-anotar" data-gid="' + esc(e.id) + '">Anotar</button>') +
+      btnCobrar +
+      '<button class="btn3" data-accion="g-editar" data-gid="' + esc(e.id) + '">Editar</button>' +
+      '<button class="btn3" data-accion="g-anular" data-gid="' + esc(e.id) + '">Anular</button></div>';
+  }).join("");
+  return cabecera + filas + '<button class="btn3" data-accion="actualizar-web" style="margin-top:8px">Actualizar</button></div>';
+}
+
+function datosParaAgenda(c, accion) {
+  var s = servicioPorId(c.servicioId);
+  var cuerpo = {
+    k: AGENDA_CLAVE, action: accion, id: c.googleId || "",
+    fecha: c.fecha, hora: c.hora, nombre: c.clienteNombre,
+    servicio: c.servicioNombre || "Cita", tel: c.clienteTelefono || "",
+    notas: c.notas || "", minutos: (s && s.minutos) || 30
+  };
+  return cuerpo;
+}
+
+function apuntarEnGoogle(c) {
+  if (!c || c.estado === "cancelado") return;
+  if (!c.clienteNombre) { c.errorGoogle = "falta el nombre"; guardar(); return; }
+  var accion = c.googleId ? "editar" : "crear";
+  fetch(AGENDA_URL, { method: "POST", body: JSON.stringify(datosParaAgenda(c, accion)) })
+    .then(function (r) { return r.json(); })
+    .then(function (r) {
+      if (r && r.success) {
+        c.googleId = r.id || c.googleId;
+        c.enGoogle = true;
+        c.errorGoogle = "";
+        delete eventosGoogle[c.fecha];
+        pedirGoogle(c.fecha);
+      } else {
+        c.errorGoogle = (r && r.error) ? r.error : "no se pudo apuntar en Google";
+      }
+      guardar();
+      pintar();
+    })
+    .catch(function () {
+      c.errorGoogle = "sin conexion, no se apunto en Google";
+      guardar();
+      pintar();
+    });
+}
+
+function anularEnGoogle(citaId) {
+  var c = datos.citas.filter(function (x) { return x.id === citaId; })[0];
+  if (!c || !c.googleId) return;
+  fetch(AGENDA_URL, { method: "POST", body: JSON.stringify({ k: AGENDA_CLAVE, action: "anular", id: c.googleId }) })
+    .then(function (r) { return r.json(); })
+    .then(function (r) {
+      delete eventosGoogle[c.fecha];
+      if (!r || !r.success) alert("En el programa queda borrada, pero Google no la anulo: " + ((r && r.error) || "sin respuesta"));
+      pedirGoogle(c.fecha);
+    })
+    .catch(function () { alert("En el programa queda borrada, pero no se pudo avisar a Google."); });
+}
+
+function anotarEventoGoogle(gid) {
+  var lista = eventosGoogle[dia] || [];
+  var e = lista.filter(function (x) { return x.id === gid; })[0];
+  if (!e) return;
+  var ya = citaDelPrograma(gid);
+  if (ya) { formCita(ya); return; }
+  var pt = partirTitulo(e.titulo);
+  var nombre = e.tel ? (e.nombre || "Cliente") : (pt.nombre || "Cliente");
+  var nombreServicio = e.tel ? (e.servicio || "Cita") : (pt.servicio || "Cita");
+  var servicio = datos.servicios.filter(function (s) { return (s.nombre || "").toLowerCase() === nombreServicio.toLowerCase(); })[0];
+  var nueva = {
+    id: nuevoId(), fecha: e.fecha, hora: e.hora, clienteId: "",
+    clienteNombre: nombre, clienteTelefono: e.tel || "",
+    servicioId: servicio ? servicio.id : "",
+    servicioNombre: nombreServicio,
+    precio: servicio ? servicio.precio : 0,
+    estado: "pendiente", pago: "efectivo", notas: e.notas || "",
+    googleId: e.id
+  };
+  datos.citas.push(nueva);
+  guardar();
+  formCita(nueva, function () {
+    datos.citas = datos.citas.filter(function (c) { return c.id !== nueva.id; });
+    guardar();
+    pintar();
+  });
+}
+
+document.addEventListener("click", function (ev) {
+  var b = ev.target;
+  while (b && b !== document.body && !(b.getAttribute && b.getAttribute("data-accion"))) b = b.parentNode;
+  if (!b || !b.getAttribute) return;
+  var accion = b.getAttribute("data-accion");
+  var gid = b.getAttribute("data-gid");
+  if (accion === "actualizar-web") { pedirOcupacion(dia, true); pintar(); }
+  else if (accion === "g-anotar" || accion === "g-editar") { anotarEventoGoogle(gid); }
+  else if (accion === "g-anular") {
+    if (!confirm("Anular esta cita tambien en Google?")) return;
+    fetch(AGENDA_URL, { method: "POST", body: JSON.stringify({ k: AGENDA_CLAVE, action: "anular", id: gid }) })
+      .then(function (r) { return r.json(); })
+      .then(function (r) {
+        if (!r || !r.success) { alert("Google no la anulo: " + ((r && r.error) || "sin respuesta")); return; }
+        datos.citas = datos.citas.filter(function (c) { return c.googleId !== gid; });
+        guardar();
+        pedirOcupacion(dia, true);
+        pintar();
+      })
+      .catch(function () { alert("No se pudo avisar a Google."); });
+  }
+}, true);
+
+function avisoBorrado(id) {
+  var c = datos.citas.filter(function (x) { return x.id === id; })[0];
+  if (c && c.googleId) return "Se borrara tambien de la agenda de Google. Seguro?";
+  return "?Borrar esta cita?";
+}
+
+
+/* ---------- pintado general ---------- */
+function pintar() {
+  try { localStorage.setItem(CLAVE_DIA, dia); } catch (e) {}
+  var pie = [];
+  if (datos.contacto) {
+    if (datos.contacto.direccion) pie.push(datos.contacto.direccion);
+    if (datos.contacto.telefono) pie.push(datos.contacto.telefono);
+  }
+  document.getElementById("titulo-salon").innerHTML =
+    esc(datos.salon || "Peluquería") + " <span>· gestión</span>" +
+    (pie.length ? '<div style="font-size:12px;color:var(--suave);font-weight:500;margin-top:2px">' + esc(pie.join(" · ")) + '</div>' : "");
+  var botones = document.querySelectorAll("nav button");
+  for (var i = 0; i < botones.length; i++) {
+    botones[i].classList.toggle("activo", botones[i].getAttribute("data-tab") === vista);
+  }
+  var caja = document.getElementById("vista");
+  var aviso = necesitaCopia() ? avisoCopia() : "";
+  if (vista === "agenda") caja.innerHTML = aviso + htmlAgenda();
+  else if (vista === "clientes") caja.innerHTML = aviso + htmlClientes();
+  else if (vista === "servicios") caja.innerHTML = aviso + htmlServicios();
+  else if (vista === "tienda") caja.innerHTML = htmlTienda();
+  else if (vista === "caja") caja.innerHTML = aviso + htmlCaja();
+  else caja.innerHTML = htmlDatos();
+  enganchar();
+}
+
+function necesitaCopia() {
+  if (!datos.citas.length && !datos.clientes.length) return false;
+  if (!datos.ultimaCopia) return true;
+  return (Date.now() - new Date(datos.ultimaCopia).getTime()) > 7 * 24 * 3600 * 1000;
+}
+
+function avisoCopia() {
+  return '<div class="aviso-copia"><span>Hace más de una semana que no se guarda una copia de seguridad.</span>' +
+    '<button class="btn3" data-accion="tab-copias">Ir a copias</button></div>';
+}
+
+/* ---------- agenda ---------- */
+function htmlAgenda() {
+  var lista = citasDelDia(dia);
+  var prox = proximaCita(dia);
+  var botonProx = prox
+    ? '<button class="btn3" data-accion="ir-proxima" data-fecha="' + esc(prox.fecha) + '">Próxima: ' +
+      esc(fechaCorta(prox.fecha)) + ' ' + esc(prox.hora) + '</button>'
+    : "";
+  var total = 0, hechas = 0;
+  for (var i = 0; i < lista.length; i++) {
+    if (lista[i].estado === "hecho") { total += Number(lista[i].precio) || 0; hechas++; }
+  }
+  var cuerpo = "";
+  if (!lista.length) {
+    cuerpo = '<div class="panel vacio">No hay citas para este día.<br><br>' +
+      '<button class="btn" data-accion="nueva-cita">Añadir la primera</button></div>';
+  } else {
+    cuerpo = '<div class="lista">' + lista.map(function (c) {
+      var clases = "cita" + (c.estado === "hecho" ? " hecho" : "") + (c.estado === "cancelado" ? " cancelado" : "");
+      return '<div class="' + clases + '">' +
+        '<div class="hora">' + esc(c.hora) + '</div>' +
+        '<div><div class="quien">' + esc(c.clienteNombre) + '</div>' +
+        '<div class="detalle">' + esc(c.servicioNombre) +
+        (c.notas ? " · " + esc(c.notas) : "") +
+        (c.estado === "hecho" ? ' <span class="etiqueta ok">hecho' + (c.pago ? " · " + esc(c.pago) : "") + '</span>' : "") +
+        (c.estado === "cancelado" ? ' <span class="etiqueta">cancelado</span>' : "") +
+        (c.enGoogle ? ' <span class="etiqueta ok">en Google</span>' : "") +
+        (c.errorGoogle ? ' <span class="etiqueta">' + esc(c.errorGoogle) + '</span>' : "") +
+        '</div></div>' +
+        '<div class="acciones">' +
+        (c.estado !== "hecho" ? '<button class="btn" data-accion="cobrar" data-id="' + c.id + '">Cobrar</button>' : "") +
+        '<button class="btn3" data-accion="editar-cita" data-id="' + c.id + '">Editar</button>' +
+        '<button class="btn3" data-accion="borrar-cita" data-id="' + c.id + '">Borrar</button>' +
+        '</div></div>';
+    }).join("") + '</div>';
+  }
+  return '<div class="barra">' +
+    '<button class="btn2" data-accion="dia-antes">←</button>' +
+    '<div class="fecha">' + esc(fechaLarga(dia)) + '</div>' +
+    '<button class="btn2" data-accion="dia-despues">→</button>' +
+    '<button class="btn3" data-accion="dia-hoy">Hoy</button>' + botonProx +
+    '<div class="crecer"></div>' +
+    '<span class="etiqueta">' + lista.length + ' citas · ' + euros(total) + ' cobrado</span>' +
+    '<button class="btn3" data-accion="abrir-reservas">Reservas online</button>' +
+    '<button class="btn" data-accion="nueva-cita">Nueva cita</button></div>' + cuerpo + panelGoogle(dia);
+}
+
+/* ---------- clientes ---------- */
+function htmlClientes() {
+  var q = (window._buscarCliente || "").toLowerCase();
+  var lista = datos.clientes.filter(function (c) {
+    return !q || (c.nombre || "").toLowerCase().indexOf(q) > -1 || (c.telefono || "").indexOf(q) > -1;
+  }).sort(function (a, b) { return (a.nombre || "").localeCompare(b.nombre || ""); });
+
+  var filas = lista.map(function (c) {
+    var suyas = datos.citas.filter(function (x) { return x.clienteId === c.id && x.estado === "hecho"; });
+    var compras = (datos.cobros || []).filter(function (x) { return x.clienteId === c.id; });
+    var gastado = compras.reduce(function (s, x) { return s + (Number(x.importe) || 0); }, 0);
+    var fechas = suyas.map(function (x) { return x.fecha; }).concat(compras.map(function (x) { return x.fecha; }));
+    var ultima = fechas.length ? fechas.sort().pop() : "";
+    return '<tr><td><b>' + esc(c.nombre) + '</b>' + (c.notas ? '<br><small>' + esc(c.notas) + '</small>' : "") + '</td>' +
+      '<td>' + esc(c.telefono || "") + (c.direccion ? '<br><small>' + esc(c.direccion) + '</small>' : "") + '</td>' +
+      '<td>' + suyas.length + '</td>' +
+      '<td>' + (ultima ? esc(ultima) : "—") + '</td>' +
+      '<td>' + euros(gastado) + '</td>' +
+      '<td><button class="btn3" data-accion="historial-cliente" data-id="' + c.id + '">Historial</button> ' +
+      '<button class="btn3" data-accion="editar-cliente" data-id="' + c.id + '">Editar</button> ' +
+      '<button class="btn3" data-accion="borrar-cliente" data-id="' + c.id + '">Borrar</button></td></tr>';
+  }).join("");
+
+  return '<div class="barra">' +
+    '<input id="buscador-cliente" placeholder="Buscar por nombre o teléfono" value="' + esc(window._buscarCliente || "") + '" style="max-width:320px">' +
+    '<div class="crecer"></div>' +
+    '<span class="etiqueta">' + datos.clientes.length + ' clientes</span>' +
+    '<button class="btn" data-accion="nuevo-cliente">Nuevo cliente</button></div>' +
+    '<div class="panel">' + (lista.length ?
+      '<table><thead><tr><th>Cliente</th><th>Teléfono</th><th>Visitas</th><th>Última</th><th>Gastado</th><th></th></tr></thead><tbody>' + filas + '</tbody></table>' :
+      '<div class="vacio">Todavía no hay clientes guardados.</div>') + '</div>';
+}
+
+/* ---------- servicios ---------- */
+function htmlServicios() {
+  var filas = datos.servicios.map(function (s) {
+    return '<tr><td><b>' + esc(s.nombre) + '</b></td>' +
+      '<td>' + (s.minutos || 0) + ' min</td>' +
+      '<td>' + euros(s.precio) + '</td>' +
+      '<td><button class="btn3" data-accion="editar-servicio" data-id="' + s.id + '">Editar</button> ' +
+      '<button class="btn3" data-accion="borrar-servicio" data-id="' + s.id + '">Borrar</button></td></tr>';
+  }).join("");
+  return '<div class="barra"><div class="crecer"></div>' +
+    '<span class="etiqueta">' + datos.servicios.length + ' servicios</span>' +
+    '<button class="btn" data-accion="nuevo-servicio">Nuevo servicio</button></div>' +
+    '<div class="panel"><table><thead><tr><th>Servicio</th><th>Duración</th><th>Precio</th><th></th></tr></thead><tbody>' +
+    filas + '</tbody></table></div>';
+}
+
+/* ---------- caja ---------- */
+function htmlCaja() {
+  var cobros = cobrosDelDia(dia);
+  var lista = citasDelDia(dia);
+  var prox = proximaCita(dia);
+  var botonProx = prox ? '<button class="btn3" data-accion="ir-proxima" data-fecha="' + esc(prox.fecha) + '">Próxima: ' + esc(fechaCorta(prox.fecha)) + ' ' + esc(prox.hora) + '</button>' : "";
+  var pendiente = lista.filter(function (c) { return c.estado === "pendiente"; });
+  var total = 0, ef = 0, tar = 0, biz = 0, trans = 0, deServicios = 0, deProductos = 0;
+  cobros.forEach(function (c) {
+    var p = Number(c.importe) || 0;
+    total += p;
+    if (c.pago === "tarjeta" || c.pago === "stripe" || c.pago === "paypal") tar += p; else if (c.pago === "bizum") biz += p; else if (c.pago === "transferencia") trans += p; else ef += p;
+    if (c.tipo === "producto") deProductos += p; else deServicios += p;
+  });
+  var pendienteEuros = pendiente.reduce(function (s, c) { return s + (Number(c.precio) || 0); }, 0);
+
+  var filas = cobros.map(function (c) {
+    return '<tr><td>' + esc(c.hora || "") + '</td><td>' + esc(c.clienteNombre || "—") + '</td><td>' + esc(c.concepto) +
+      (c.tipo === "producto" ? ' <span class="etiqueta">producto</span>' : "") + '</td>' +
+      '<td>' + esc(c.pago || "efectivo") + '</td><td>' + euros(c.importe) + '</td>' +
+      '<td><button class="btn3" data-accion="borrar-cobro" data-id="' + esc(c.id) + '">Anular</button></td></tr>';
+  }).join("");
+
+  return '<div class="barra">' +
+    '<button class="btn2" data-accion="dia-antes">←</button>' +
+    '<div class="fecha">' + esc(fechaLarga(dia)) + '</div>' +
+    '<button class="btn2" data-accion="dia-despues">→</button>' +
+    '<button class="btn3" data-accion="dia-hoy">Hoy</button>' + botonProx +
+    '<div class="crecer"></div>' +
+    '<button class="btn3" data-accion="exportar-dia">Descargar el día (CSV)</button>' +
+    '<button class="btn" data-accion="nuevo-cobro">Nuevo cobro</button></div>' +
+    '<div class="rejilla">' +
+    '<div class="tarjeta"><h3>Cobrado ese día</h3><div class="grande">' + euros(total) + '</div>' +
+    '<div class="fila-dato"><span>Efectivo</span><b>' + euros(ef) + '</b></div>' +
+    '<div class="fila-dato"><span>Tarjeta</span><b>' + euros(tar) + '</b></div>' +
+    '<div class="fila-dato"><span>Bizum</span><b>' + euros(biz) + '</b></div>' +
+    '<div class="fila-dato"><span>Transferencia</span><b>' + euros(trans) + '</b></div>' +
+    '<div class="fila-dato"><span>Servicios / productos</span><b>' + euros(deServicios) + ' / ' + euros(deProductos) + '</b></div></div>' +
+    '<div class="tarjeta"><h3>Por cobrar</h3><div class="grande">' + euros(pendienteEuros) + '</div>' +
+    '<div class="fila-dato"><span>Citas pendientes</span><b>' + pendiente.length + '</b></div>' +
+    '<div class="fila-dato"><span>Tique medio</span><b>' + euros(cobros.length ? total / cobros.length : 0) + '</b></div></div>' +
+    '</div>' +
+    '<div class="panel" style="margin-top:14px">' +
+    (cobros.length ? '<table><thead><tr><th>Hora</th><th>Cliente</th><th>Concepto</th><th>Pago</th><th>Importe</th><th></th></tr></thead><tbody>' + filas + '</tbody></table>' :
+      '<div class="vacio">Todavía no hay cobros apuntados este día.</div>') +
+    '</div>';
+}
+
+/* ---------- tienda ---------- */
+var pedidosTienda = null;
+var errorPedidos = "";
+var cargandoPedidos = false;
+
+function pedirPedidos() {
+  if (cargandoPedidos) return;
+  cargandoPedidos = true;
+  fetch(AGENDA_URL + "?action=pedidos&k=" + encodeURIComponent(AGENDA_CLAVE))
+    .then(function (r) { return r.json(); })
+    .then(function (r) {
+      cargandoPedidos = false;
+      if (r && r.success) { pedidosTienda = r.pedidos || []; errorPedidos = ""; }
+      else errorPedidos = (r && r.error) || "La tienda online no contestó.";
+      if (vista === "tienda") pintar();
+    })
+    .catch(function () {
+      cargandoPedidos = false;
+      errorPedidos = "Sin conexión con la tienda online.";
+      if (vista === "tienda") pintar();
+    });
+}
+
+function publicarProductos() {
+  var lista = (datos.productos || []).map(function (p) {
+    return { id: p.id, nombre: p.nombre, precio: Number(p.precio) || 0, stock: Number(p.stock) || 0, descripcion: p.descripcion || "" };
+  });
+  fetch(AGENDA_URL, { method: "POST", body: JSON.stringify({ k: AGENDA_CLAVE, action: "guardar-productos", productos: lista }) })
+    .then(function (r) { return r.json(); })
+    .then(function () { pedidosTienda = null; })
+    .catch(function () {});
+}
+
+function tiendaUrl() {
+  var url = (datos.contacto && datos.contacto.tienda) || "";
+  return url || (AGENDA_URL + "?pagina=tienda");
+}
+
+function htmlTienda() {
+  var productos = datos.productos || [];
+  var hoy = hoyISO();
+  var ventasHoy = (datos.cobros || []).filter(function (c) { return c.fecha === hoy && c.tipo === "producto"; });
+  var totalHoy = ventasHoy.reduce(function (s, c) { return s + (Number(c.importe) || 0); }, 0);
+  var bajo = productos.filter(function (p) { return Number(p.stock) <= 2; }).length;
+
+  var filas = productos.map(function (p) {
+    var stock = Number(p.stock) || 0;
+    return '<tr><td><b>' + esc(p.nombre) + '</b>' + (p.descripcion ? '<br><small>' + esc(p.descripcion) + '</small>' : "") + '</td>' +
+      '<td>' + euros(p.precio) + '</td>' +
+      '<td>' + stock + (stock <= 2 ? ' <span class="etiqueta">quedan pocos</span>' : "") + '</td>' +
+      '<td><button class="btn3" data-accion="vender" data-id="' + esc(p.id) + '">Vender</button> ' +
+      '<button class="btn3" data-accion="editar-producto" data-id="' + esc(p.id) + '">Editar</button> ' +
+      '<button class="btn3" data-accion="borrar-producto" data-id="' + esc(p.id) + '">Borrar</button></td></tr>';
+  }).join("");
+
+  var pedidosHtml;
+  if (!pedidosTienda && !errorPedidos) {
+    pedidosHtml = '<div class="detalle">Consultando los pedidos de la tienda...</div>';
+    pedirPedidos();
+  } else if (errorPedidos) {
+    pedidosHtml = '<div class="detalle">' + esc(errorPedidos) + '</div>';
+  } else if (!pedidosTienda.length) {
+    pedidosHtml = '<div class="detalle">No hay pedidos pendientes.</div>';
+  } else {
+    pedidosHtml = pedidosTienda.map(function (p) {
+      var items = (p.items || []).map(function (i) { return esc(i.nombre) + " x" + (i.cantidad || 1); }).join(" · ");
+      var pagado = p.estado === "pagado";
+      return '<div class="fila-dato"><span><b>' + esc(p.nombre || "Cliente") + '</b> &middot; ' + esc(p.tel || "") +
+        '<div class="detalle">' + items + ' &middot; ' + esc(p.pago || "efectivo") + ' &middot; ' + esc(p.fechaTexto || p.fecha || "") +
+        (pagado ? ' &middot; <span class="etiqueta ok">pagado online</span>' : '') + '</div></span>' +
+        '<span><b>' + euros(p.total) + '</b> ' +
+        (p.estado !== 'entregado' && p.estado !== 'anulado' ? '<button class="btn3" data-accion="pedido-comprobar-pago" data-id="' + esc(p.id) + '">Comprobar pago</button> ' : '') +
+        (p.estado === 'entregado' ? '<span class="etiqueta ok">entregado</span> ' :
+          p.estado === 'anulado' ? '<span class="etiqueta">anulado</span> ' :
+          '<button class="btn3" data-accion="pedido-entregado" data-id="' + esc(p.id) + '">' + (pagado ? 'Entregar' : 'Entregar y cobrar') + '</button> ') +
+        (p.estado !== 'entregado' && p.estado !== 'anulado' ? '<button class="btn3" data-accion="pedido-anulado" data-id="' + esc(p.id) + '">Anular</button>' : '') + '</span></div>';
+    }).join("");
+  }
+
+  return '<div class="barra"><div class="crecer"></div>' +
+    '<span class="etiqueta">' + productos.length + ' productos' + (bajo ? " · " + bajo + " con poco stock" : "") + '</span>' +
+    '<button class="btn2" data-accion="publicar-productos">Publicar catálogo</button>' +
+    '<button class="btn2" data-accion="configurar-stripe">Configurar Stripe</button>' +
+    '<button class="btn2" data-accion="configurar-paypal">Configurar PayPal</button>' +
+    '<button class="btn2" data-accion="abrir-tienda">Ver tienda online</button>' +
+    '<button class="btn" data-accion="nuevo-producto">Nuevo producto</button></div>' +
+    '<div class="rejilla">' +
+    '<div class="tarjeta"><h3>Vendido hoy en tienda</h3><div class="grande">' + euros(totalHoy) + '</div>' +
+    '<div class="fila-dato"><span>Ventas</span><b>' + ventasHoy.length + '</b></div></div>' +
+    '<div class="tarjeta"><h3>Pedidos online pendientes</h3><div class="grande">' +
+    (pedidosTienda ? pedidosTienda.length : "—") + '</div>' +
+    '<div class="fila-dato"><span>Se cobran al entregar</span><b>en tienda</b></div></div>' +
+    '</div>' +
+    '<div class="panel" style="margin-top:14px"><h3 style="margin-top:0">Productos a la venta</h3>' +
+    (productos.length ? '<table><thead><tr><th>Producto</th><th>Precio</th><th>Stock</th><th></th></tr></thead><tbody>' + filas + '</tbody></table>' :
+      '<div class="vacio">Todavía no hay productos. Añada el primero con «Nuevo producto».</div>') +
+    '</div>' +
+    '<div class="panel" style="margin-top:14px"><h3 style="margin-top:0">Pedidos de la tienda online</h3>' +
+    pedidosHtml +
+    '<button class="btn3" data-accion="pedidos-actualizar" style="margin-top:8px">Actualizar pedidos</button></div>';
+}
+
+/* ---------- copias ---------- */
+function htmlDatos() {
+  var tam = 0;
+  try { tam = new Blob([JSON.stringify(datos)]).size; } catch (e) { tam = 0; }
+  var c = datos.contacto || contactoInicial();
+  return '<div class="rejilla">' +
+    '<div class="tarjeta"><h3>Datos del salón</h3>' +
+    '<label>Nombre<input id="nombre-salon" value="' + esc(datos.salon || "") + '" maxlength="60"></label>' +
+    '<div class="dos" style="margin-top:10px">' +
+    '<label>Teléfono<input id="contacto-telefono" value="' + esc(c.telefono || "") + '"></label>' +
+    '<label>Correo<input id="contacto-correo" value="' + esc(c.correo || "") + '"></label>' +
+    '</div>' +
+    '<label style="margin-top:10px">Dirección<input id="contacto-direccion" value="' + esc(c.direccion || "") + '"></label>' +
+    '<label style="margin-top:10px">Página web<input id="contacto-web" value="' + esc(c.web || "") + '"></label>' +
+    '<label style="margin-top:10px">Reservas online<input id="contacto-reservas" value="' + esc(c.reservas || "") + '"></label>' +
+    '<label style="margin-top:10px">Tienda online<input id="contacto-tienda" value="' + esc(c.tienda || "") + '" placeholder="Se rellena sola si la deja vacía"></label>' +
+    '<p><button class="btn" data-accion="guardar-contacto">Guardar datos</button></p></div>' +
+    '<div class="tarjeta"><h3>Reservas y contacto</h3>' +
+    '<p>Mande a los clientes a la reserva online con este botón, o copie el enlace para pegarlo en WhatsApp.</p>' +
+    '<p><button class="btn" data-accion="abrir-reservas">Abrir reservas online</button> ' +
+    '<button class="btn2" data-accion="copiar-reservas">Copiar enlace</button></p>' +
+    '<p><button class="btn" data-accion="abrir-tienda">Abrir la tienda online</button> ' +
+    '<button class="btn2" data-accion="copiar-tienda">Copiar enlace de la tienda</button></p>' +
+    '<div class="fila-dato"><span>Teléfono</span><b>' + esc(c.telefono || "—") + '</b></div>' +
+    '<div class="fila-dato"><span>Correo</span><b>' + esc(c.correo || "—") + '</b></div>' +
+    '<div class="fila-dato"><span>Web</span><b>' + esc(c.web || "—") + '</b></div>' +
+    '<div class="fila-dato"><span>Dirección</span><b>' + esc(c.direccion || "—") + '</b></div></div>' +
+    '<div class="tarjeta"><h3>Guardar copia</h3>' +
+    '<p>Descarga un archivo con todos los clientes, citas y servicios. Guárdelo en un pendrive o en el disco D.</p>' +
+    '<button class="btn" data-accion="exportar">Descargar copia</button>' +
+    '<p><small>Última copia: ' + (datos.ultimaCopia ? esc(new Date(datos.ultimaCopia).toLocaleString("es-ES")) : "nunca") + '</small></p></div>' +
+    '<div class="tarjeta"><h3>Restaurar copia</h3>' +
+    '<p>Lee un archivo de copia y sustituye todo lo que hay ahora.</p>' +
+    '<input type="file" id="archivo-copia" accept="application/json,.json">' +
+    '<p><small>Se pedirá confirmación antes de sustituir los datos.</small></p></div>' +
+    '<div class="tarjeta"><h3>Datos guardados</h3>' +
+    '<div class="fila-dato"><span>Clientes</span><b>' + datos.clientes.length + '</b></div>' +
+    '<div class="fila-dato"><span>Citas</span><b>' + datos.citas.length + '</b></div>' +
+    '<div class="fila-dato"><span>Cobros</span><b>' + (datos.cobros || []).length + '</b></div>' +
+    '<div class="fila-dato"><span>Productos</span><b>' + (datos.productos || []).length + '</b></div>' +
+    '<div class="fila-dato"><span>Servicios</span><b>' + datos.servicios.length + '</b></div>' +
+    '<div class="fila-dato"><span>Ocupado</span><b>' + (tam / 1024).toFixed(0) + ' KB</b></div></div>' +
+    '</div>' +
+    '<div class="panel" style="margin-top:14px"><h3 style="margin-top:0">Empezar de cero</h3>' +
+    '<p>Borra clientes, citas y servicios y deja el programa como nuevo. No se puede deshacer.</p>' +
+    '<button class="btn2" data-accion="vaciar">Borrar todo</button></div>';
+}
+
+/* ---------- formularios ---------- */
+var alCerrarDialogo = null;
+function abrirFormulario(titulo, cuerpo, alGuardar, alCancelar) {
+  var dlg = document.getElementById("dialogo");
+  var form = document.getElementById("formulario");
+  form.innerHTML = '<h2>' + esc(titulo) + '</h2>' + cuerpo +
+    '<div class="pie-form"><button type="button" class="btn2" data-cerrar>Cancelar</button>' +
+    '<button type="submit" class="btn">Guardar</button></div>';
+  alCerrarDialogo = alCancelar || null;
+  form.onsubmit = function (ev) {
+    ev.preventDefault();
+    if (alGuardar(form) !== false) {
+      alCerrarDialogo = null;
+      dlg.close();
+      guardar();
+      pintar();
+    }
+  };
+  var cerrar = form.querySelector("[data-cerrar]");
+  if (cerrar) cerrar.onclick = function () { dlg.close(); };
+  if (typeof dlg.showModal === "function") dlg.showModal(); else dlg.setAttribute("open", "");
+}
+
+document.getElementById("dialogo").addEventListener("close", function () {
+  if (alCerrarDialogo) { var f = alCerrarDialogo; alCerrarDialogo = null; try { f(); } catch (e) {} }
+});
+
+function opcionesServicios(sel) {
+  return datos.servicios.map(function (s) {
+    return '<option value="' + s.id + '" data-precio="' + s.precio + '"' + (s.id === sel ? " selected" : "") + '>' +
+      esc(s.nombre) + ' · ' + euros(s.precio) + '</option>';
+  }).join("");
+}
+
+function opcionesClientes(sel) {
+  return '<option value="">— cliente nuevo —</option>' + datos.clientes.map(function (c) {
+    return '<option value="' + c.id + '"' + (c.id === sel ? " selected" : "") + '>' + esc(c.nombre) + '</option>';
+  }).join("");
+}
+
+function formCita(cita, alCancelar) {
+  var esNueva = !cita;
+  cita = cita || { fecha: dia, hora: "10:00", estado: "pendiente", pago: "efectivo", precio: "", notas: "" };
+  var cuerpo =
+    '<div class="dos">' +
+    '<label>Fecha<input type="date" name="fecha" value="' + esc(cita.fecha) + '" required></label>' +
+    '<label>Hora<input type="time" name="hora" value="' + esc(cita.hora) + '" required></label>' +
+    '</div>' +
+    '<label>Cliente ya guardado<select name="clienteId">' + opcionesClientes(cita.clienteId) + '</select></label>' +
+    '<div class="dos">' +
+    '<label>Nombre<input name="clienteNombre" value="' + esc(cita.clienteNombre || "") + '" placeholder="Nombre y apellido"></label>' +
+    '<label>Teléfono<input name="clienteTelefono" value="' + esc(cita.clienteTelefono || "") + '"></label>' +
+    '</div>' +
+    '<label>Servicio<select name="servicioId">' + opcionesServicios(cita.servicioId) + '</select></label>' +
+    '<div class="dos">' +
+    '<label>Precio (€)<input type="number" step="0.5" min="0" name="precio" value="' + esc(cita.precio === "" ? "" : cita.precio) + '"></label>' +
+    '<label>Estado<select name="estado">' +
+    '<option value="pendiente"' + (cita.estado === "pendiente" ? " selected" : "") + '>Pendiente</option>' +
+    '<option value="hecho"' + (cita.estado === "hecho" ? " selected" : "") + '>Hecho</option>' +
+    '<option value="cancelado"' + (cita.estado === "cancelado" ? " selected" : "") + '>Cancelado</option>' +
+    '</select></label></div>' +
+    '<label>Forma de pago<select name="pago">' + opcionesPago(cita.pago) + '</select></label>' +
+    '<label>Notas<input name="notas" value="' + esc(cita.notas || "") + '" placeholder="Alergias, preferencias..."></label>';
+
+  abrirFormulario(esNueva ? "Nueva cita" : "Editar cita", cuerpo, function (form) {
+    var d = {};
+    ["fecha", "hora", "clienteId", "clienteNombre", "clienteTelefono", "servicioId", "precio", "estado", "pago", "notas"].forEach(function (k) {
+      d[k] = form.elements[k].value.trim();
+    });
+    if (!d.clienteNombre && d.clienteId) {
+      var c = clientePorId(d.clienteId);
+      if (c) d.clienteNombre = c.nombre;
+    }
+    if (!d.clienteNombre) { alert("Escriba el nombre del cliente."); return false; }
+
+    var s = servicioPorId(d.servicioId);
+    if (!d.precio && s) d.precio = s.precio;
+    if (!d.servicioNombre && s) d.servicioNombre = s.nombre;
+
+    // guardar el cliente si es nuevo
+    if (!d.clienteId && d.clienteNombre) {
+      var existente = datos.clientes.filter(function (x) {
+        return (x.nombre || "").toLowerCase() === d.clienteNombre.toLowerCase();
+      })[0];
+      if (existente) { d.clienteId = existente.id; }
+      else {
+        var nuevo = { id: nuevoId(), nombre: d.clienteNombre, telefono: d.clienteTelefono || "", notas: "" };
+        datos.clientes.push(nuevo);
+        d.clienteId = nuevo.id;
+      }
+    }
+
+    if (esNueva) {
+      var nueva = {
+        id: nuevoId(), fecha: d.fecha, hora: d.hora, clienteId: d.clienteId,
+        clienteNombre: d.clienteNombre, clienteTelefono: d.clienteTelefono || "",
+        servicioId: d.servicioId,
+        servicioNombre: d.servicioNombre || "Servicio", precio: Number(d.precio) || 0,
+        estado: d.estado, pago: d.pago, notas: d.notas
+      };
+      datos.citas.push(nueva);
+      apuntarEnGoogle(nueva);
+    } else {
+      var estadoAntes = cita.estado;
+      var precioAntes = Number(cita.precio) || 0;
+      var eraHecho = estadoAntes === "hecho";
+      cita.fecha = d.fecha; cita.hora = d.hora; cita.clienteId = d.clienteId;
+      cita.clienteNombre = d.clienteNombre; cita.servicioId = d.servicioId;
+      cita.servicioNombre = d.servicioNombre || cita.servicioNombre;
+      cita.precio = Number(d.precio) || 0; cita.estado = d.estado;
+
+      cita.pago = d.pago; cita.notas = d.notas;
+      cita.clienteTelefono = d.clienteTelefono || cita.clienteTelefono || "";
+
+      function cobroAutoDeCita(cid) {
+        return (datos.cobros || []).filter(function (x) {
+          return x.citaId === cid && (x.origen === "cita" || (!x.origen && x.citaId));
+        })[0] || null;
+      }
+
+      if (d.estado === "hecho" && !eraHecho) {
+        // recien marcada como hecha: crear cobro automatico
+        if (!cobroAutoDeCita(cita.id)) {
+          registrarCobro({
+            fecha: cita.fecha, hora: cita.hora, clienteId: cita.clienteId, clienteNombre: cita.clienteNombre,
+            concepto: cita.servicioNombre || "Servicio", tipo: "servicio", importe: cita.precio,
+            pago: cita.pago, citaId: cita.id, origen: "cita"
+          });
+        }
+      } else if (eraHecho && d.estado !== "hecho") {
+        // sale de hecho: anular el cobro automatico si existe (no toca los manuales)
+        var cbAutoSalir = cobroAutoDeCita(cita.id);
+        if (cbAutoSalir) {
+          datos.cobros = datos.cobros.filter(function (x) { return x.id !== cbAutoSalir.id; });
+        }
+      } else if (eraHecho && d.estado === "hecho") {
+        // sigue hecha: actualizar importe y pago del cobro automatico si cambio
+        var cbAutoEdit = cobroAutoDeCita(cita.id);
+        if (cbAutoEdit) {
+          cbAutoEdit.importe = cita.precio;
+          cbAutoEdit.pago = cita.pago;
+          cbAutoEdit.concepto = cita.servicioNombre || cbAutoEdit.concepto;
+        } else {
+          // hecha sin cobro automatico: crearlo para no perder el servicio
+          registrarCobro({
+            fecha: cita.fecha, hora: cita.hora, clienteId: cita.clienteId, clienteNombre: cita.clienteNombre,
+            concepto: cita.servicioNombre || "Servicio", tipo: "servicio", importe: cita.precio,
+            pago: cita.pago, citaId: cita.id, origen: "cita"
+          });
+        }
+      }
+      if (cita.estado === "cancelado" && cita.googleId) {
+        var gidCancel = cita.googleId;
+        anularEnGoogle(cita.id);
+        cita.googleId = ""; cita.enGoogle = false;
+      } else {
+        apuntarEnGoogle(cita);
+      }
+    }
+    dia = d.fecha;
+  }, alCancelar);
+}
+
+function formCliente(cliente) {
+  var esNuevo = !cliente;
+  cliente = cliente || { nombre: "", telefono: "", direccion: "", notas: "" };
+  var cuerpo = '<label>Nombre<input name="nombre" value="' + esc(cliente.nombre) + '" required></label>' +
+    '<div class="dos">' +
+    '<label>Teléfono<input name="telefono" value="' + esc(cliente.telefono || "") + '"></label>' +
+    '<label>Dirección<input name="direccion" value="' + esc(cliente.direccion || "") + '" placeholder="Para pedidos a domicilio"></label></div>' +
+    '<label>Notas<textarea name="notas" rows="3">' + esc(cliente.notas || "") + '</textarea></label>';
+  abrirFormulario(esNuevo ? "Nuevo cliente" : "Editar cliente", cuerpo, function (form) {
+    var n = form.elements.nombre.value.trim();
+    if (!n) { alert("El nombre no puede quedar vacío."); return false; }
+    var telefono = form.elements.telefono.value.trim();
+    var direccion = form.elements.direccion.value.trim();
+    var notas = form.elements.notas.value.trim();
+    if (esNuevo) {
+      datos.clientes.push({ id: nuevoId(), nombre: n, telefono: telefono, direccion: direccion, notas: notas });
+    } else {
+      cliente.nombre = n;
+      cliente.telefono = telefono;
+      cliente.direccion = direccion;
+      cliente.notas = notas;
+    }
+  });
+}
+
+function historialCliente(cliente) {
+  if (!cliente) return;
+  var citas = datos.citas.filter(function (c) { return c.clienteId === cliente.id; })
+    .sort(function (a, b) { return (b.fecha + (b.hora || "")).localeCompare(a.fecha + (a.hora || "")); });
+  var compras = (datos.cobros || []).filter(function (c) { return c.clienteId === cliente.id; })
+    .sort(function (a, b) { return (b.fecha + (b.hora || "")).localeCompare(a.fecha + (a.hora || "")); });
+  var gastado = compras.reduce(function (s, c) { return s + (Number(c.importe) || 0); }, 0);
+  var filasCitas = citas.map(function (c) {
+    return '<tr><td>' + esc(c.fecha) + '</td><td>' + esc(c.hora || "") + '</td><td>' + esc(c.servicioNombre || "") + '</td>' +
+      '<td>' + esc(c.estado || "") + '</td><td>' + euros(c.precio) + '</td></tr>';
+  }).join("");
+  var filasCompras = compras.map(function (c) {
+    return '<tr><td>' + esc(c.fecha) + '</td><td>' + esc(c.concepto) + '</td><td>' + esc(c.pago || "") + '</td><td>' + euros(c.importe) + '</td></tr>';
+  }).join("");
+  var cuerpo =
+    '<div class="fila-dato"><span>Teléfono</span><b>' + esc(cliente.telefono || "—") + '</b></div>' +
+    '<div class="fila-dato"><span>Dirección</span><b>' + esc(cliente.direccion || "—") + '</b></div>' +
+    '<div class="fila-dato"><span>Visitas</span><b>' + citas.filter(function (c) { return c.estado === "hecho"; }).length + '</b></div>' +
+    '<div class="fila-dato"><span>Total gastado</span><b>' + euros(gastado) + '</b></div>' +
+    (cliente.notas ? '<p><small>' + esc(cliente.notas) + '</small></p>' : "") +
+    '<h3 style="margin:14px 0 6px">Citas</h3>' +
+    (citas.length ? '<table><thead><tr><th>Fecha</th><th>Hora</th><th>Servicio</th><th>Estado</th><th>Precio</th></tr></thead><tbody>' + filasCitas + '</tbody></table>' : '<div class="detalle">Sin citas.</div>') +
+    '<h3 style="margin:14px 0 6px">Compras y cobros</h3>' +
+    (compras.length ? '<table><thead><tr><th>Fecha</th><th>Concepto</th><th>Pago</th><th>Importe</th></tr></thead><tbody>' + filasCompras + '</tbody></table>' : '<div class="detalle">Sin compras.</div>');
+  abrirFormulario("Ficha de " + cliente.nombre, cuerpo, function () { return false; });
+  var form = document.getElementById("formulario");
+  var boton = form.querySelector('button[type="submit"]');
+  if (boton) {
+    boton.type = "button";
+    boton.textContent = "Cerrar";
+    boton.onclick = function () { alCerrarDialogo = null; document.getElementById("dialogo").close(); };
+  }
+}
+
+function formProducto(producto) {
+  var esNuevo = !producto;
+  producto = producto || { nombre: "", precio: 0, stock: 0, descripcion: "" };
+  var cuerpo = '<label>Producto<input name="nombre" value="' + esc(producto.nombre) + '" placeholder="Champú, mascarilla, aceite..." required></label>' +
+    '<div class="dos"><label>Precio (€)<input type="number" step="0.5" min="0" name="precio" value="' + esc(producto.precio) + '"></label>' +
+    '<label>Stock<input type="number" step="1" min="0" name="stock" value="' + esc(producto.stock) + '"></label></div>' +
+    '<label>Descripción<input name="descripcion" value="' + esc(producto.descripcion || "") + '" placeholder="Para la tienda online"></label>';
+  abrirFormulario(esNuevo ? "Nuevo producto" : "Editar producto", cuerpo, function (form) {
+    var n = form.elements.nombre.value.trim();
+    if (!n) { alert("El nombre no puede quedar vacío."); return false; }
+    var precio = Number(form.elements.precio.value) || 0;
+    var stock = Number(form.elements.stock.value) || 0;
+    var descripcion = form.elements.descripcion.value.trim();
+    if (esNuevo) datos.productos.push({ id: nuevoId(), nombre: n, precio: precio, stock: stock, descripcion: descripcion, activo: true });
+    else { producto.nombre = n; producto.precio = precio; producto.stock = stock; producto.descripcion = descripcion; }
+    publicarProductos();
+  });
+}
+
+function opcionesPago(sel) {
+  return '<option value="efectivo"' + (sel !== "tarjeta" && sel !== "bizum" && sel !== "transferencia" ? " selected" : "") + '>Efectivo</option>' +
+    '<option value="tarjeta"' + (sel === "tarjeta" ? " selected" : "") + '>Tarjeta</option>' +
+    '<option value="bizum"' + (sel === "bizum" ? " selected" : "") + '>Bizum</option>' +
+    '<option value="transferencia"' + (sel === "transferencia" ? " selected" : "") + '>Transferencia</option>';
+}
+
+function formCobroManual() {
+  var cuerpo = '<div class="dos">' +
+    '<label>Importe (€)<input type="number" step="0.5" min="0" name="importe" value="" required></label>' +
+    '<label>Forma de pago<select name="pago">' + opcionesPago() + '</select></label></div>' +
+    '<label>Concepto<input name="concepto" value="" placeholder="Corte, producto, propina..." required></label>' +
+    '<label>Cliente<select name="clienteId">' + opcionesClientes("") + '</select></label>' +
+    '<label>Nombre suelto<input name="clienteNombre" value="" placeholder="Opcional"></label>';
+  abrirFormulario("Nuevo cobro", cuerpo, function (form) {
+    var importe = Number(form.elements.importe.value) || 0;
+    var concepto = form.elements.concepto.value.trim() || "Cobro";
+    if (importe <= 0) { alert("Escriba el importe."); return false; }
+    var clienteId = form.elements.clienteId.value;
+    var c = clienteId ? clientePorId(clienteId) : null;
+    registrarCobro({
+      fecha: dia, clienteId: clienteId, clienteNombre: c ? c.nombre : form.elements.clienteNombre.value.trim(),
+      concepto: concepto, tipo: "otro", importe: importe, pago: form.elements.pago.value, origen: "manual"
+    });
+  });
+}
+
+function formVenta(producto) {
+  if (!producto) return;
+  var cuerpo = '<p style="margin:0">' + esc(producto.nombre) + ' · ' + euros(producto.precio) + ' · quedan ' + (Number(producto.stock) || 0) + '</p>' +
+    '<div class="dos">' +
+    '<label>Cantidad<input type="number" step="1" min="1" name="cantidad" value="1" required></label>' +
+    '<label>Forma de pago<select name="pago">' + opcionesPago() + '</select></label></div>' +
+    '<label>Cliente<select name="clienteId">' + opcionesClientes("") + '</select></label>' +
+    '<label>Nombre suelto<input name="clienteNombre" value="" placeholder="Opcional"></label>';
+  abrirFormulario("Vender " + producto.nombre, cuerpo, function (form) {
+    var cantidad = Math.max(1, Number(form.elements.cantidad.value) || 1);
+    var stock = Number(producto.stock) || 0;
+    if (cantidad > stock) { alert("Solo quedan " + stock + " unidades."); return false; }
+    var clienteId = form.elements.clienteId.value;
+    var c = clienteId ? clientePorId(clienteId) : null;
+    producto.stock = stock - cantidad;
+    registrarCobro({
+      fecha: hoyISO(), clienteId: clienteId, clienteNombre: c ? c.nombre : form.elements.clienteNombre.value.trim(),
+      concepto: producto.nombre + (cantidad > 1 ? " x" + cantidad : ""), tipo: "producto",
+      importe: (Number(producto.precio) || 0) * cantidad, pago: form.elements.pago.value, origen: "manual"
+    });
+    publicarProductos();
+  });
+}
+
+function formServicio(servicio) {
+  var esNuevo = !servicio;
+  servicio = servicio || { nombre: "", precio: 0, minutos: 30 };
+  var cuerpo = '<label>Nombre<input name="nombre" value="' + esc(servicio.nombre) + '" required></label>' +
+    '<div class="dos"><label>Precio (€)<input type="number" step="0.5" min="0" name="precio" value="' + esc(servicio.precio) + '"></label>' +
+    '<label>Duración (min)<input type="number" step="5" min="0" name="minutos" value="' + esc(servicio.minutos) + '"></label></div>';
+  abrirFormulario(esNuevo ? "Nuevo servicio" : "Editar servicio", cuerpo, function (form) {
+    var n = form.elements.nombre.value.trim();
+    if (!n) { alert("El nombre no puede quedar vacío."); return false; }
+    var precio = Number(form.elements.precio.value) || 0;
+    var minutos = Number(form.elements.minutos.value) || 0;
+    if (esNuevo) datos.servicios.push({ id: nuevoId(), nombre: n, precio: precio, minutos: minutos });
+    else { servicio.nombre = n; servicio.precio = precio; servicio.minutos = minutos; }
+  });
+}
+
+/* ---------- acciones ---------- */
+function descargar(nombre, texto, tipo) {
+  var blob = new Blob([texto], { type: tipo || "application/json" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url; a.download = nombre;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+}
+
+function exportarCopia() {
+  datos.ultimaCopia = new Date().toISOString();
+  guardar();
+  descargar("peluqueria-" + hoyISO() + ".json", JSON.stringify(datos, null, 2));
+  pintar();
+}
+
+function exportarDia() {
+  var cobros = cobrosDelDia(dia);
+  var lineas = ["Cobros del día"];
+  lineas.push("Hora;Cliente;Concepto;Pago;Importe");
+  cobros.forEach(function (c) {
+    lineas.push([c.hora || "", c.clienteNombre || "", c.concepto, c.pago || "", (Number(c.importe) || 0).toFixed(2).replace(".", ",")].join(";"));
+  });
+  var total = cobros.reduce(function (s, c) { return s + (Number(c.importe) || 0); }, 0);
+  lineas.push(";;;Total;" + total.toFixed(2).replace(".", ","));
+  lineas.push("");
+  lineas.push("Citas del día");
+  lineas.push("Hora;Cliente;Servicio;Estado;Pago;Importe");
+  citasDelDia(dia).forEach(function (c) {
+    lineas.push([c.hora, c.clienteNombre, c.servicioNombre, c.estado, c.pago || "", (Number(c.precio) || 0).toFixed(2).replace(".", ",")].join(";"));
+  });
+  descargar("caja-" + dia + ".csv", "\ufeff" + lineas.join("\r\n"), "text/csv");
+}
+
+function abrirReservas() {
+  var url = (datos.contacto && datos.contacto.reservas) || "";
+  if (!url) { alert("Escriba primero la dirección de reservas online en la pestaña Salón."); return; }
+  window.open(url, "_blank");
+}
+
+function abrirTienda() {
+  window.open(tiendaUrl(), "_blank");
+}
+
+function copiarTienda() {
+  var url = tiendaUrl();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(function () { alert("Enlace copiado:\n" + url); }, function () { prompt("Copie el enlace:", url); });
+  } else {
+    prompt("Copie el enlace:", url);
+  }
+}
+
+function copiarReservas() {
+  var url = (datos.contacto && datos.contacto.reservas) || "";
+  if (!url) { alert("Escriba primero la dirección de reservas online en la pestaña Salón."); return; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(function () {
+      alert("Enlace copiado:\n" + url);
+    }, function () {
+      prompt("Copie el enlace:", url);
+    });
+  } else {
+    prompt("Copie el enlace:", url);
+  }
+}
+
+function enganchar() {
+  var vistaEl = document.getElementById("vista");
+  vistaEl.querySelectorAll("[data-accion]").forEach(function (b) {
+    b.onclick = function () {
+      var a = b.getAttribute("data-accion");
+      var id = b.getAttribute("data-id");
+      if (a === "nueva-cita") formCita(null);
+      else if (a === "editar-cita") formCita(datos.citas.filter(function (c) { return c.id === id; })[0]);
+      else if (a === "borrar-cita") {
+        if (confirm(avisoBorrado(id))) {
+          anularEnGoogle(id);
+          // anular el cobro automatico de esa cita (no los manuales)
+          datos.cobros = (datos.cobros || []).filter(function (x) {
+            if (x.citaId !== id) return true;
+            return !(x.origen === "cita" || (!x.origen && x.citaId));
+          });
+          datos.citas = datos.citas.filter(function (c) { return c.id !== id; });
+          guardar(); pintar();
+        }
+      } else if (a === "cobrar") {
+        cobrarCita(datos.citas.filter(function (x) { return x.id === id; })[0]);
+      } else if (a === "nuevo-cobro") formCobroManual();
+      else if (a === "borrar-cobro") {
+        var cb = (datos.cobros || []).filter(function (x) { return x.id === id; })[0];
+        if (!cb) return;
+        if (!confirm("¿Anular este cobro de " + euros(cb.importe) + "?")) return;
+        if (cb.citaId) {
+          var citaDelCobro = datos.citas.filter(function (x) { return x.id === cb.citaId; })[0];
+          if (citaDelCobro) citaDelCobro.estado = "pendiente";
+        }
+        datos.cobros = datos.cobros.filter(function (x) { return x.id !== id; });
+        guardar(); pintar();
+      } else if (a === "nuevo-producto") formProducto(null);
+      else if (a === "editar-producto") formProducto(productoPorId(id));
+      else if (a === "borrar-producto") {
+        if (confirm("¿Borrar este producto de la tienda?")) {
+          datos.productos = (datos.productos || []).filter(function (x) { return x.id !== id; });
+          publicarProductos(); guardar(); pintar();
+        }
+      } else if (a === "vender") formVenta(productoPorId(id));
+      else if (a === "abrir-tienda") window.open(tiendaUrl(), "_blank");
+      else if (a === "publicar-productos") {
+        publicarProductos();
+        alert("Catálogo enviado a la tienda online. Si la tienda aún no está desplegada, no se verá todavía.");
+      } else if (a === "configurar-stripe") {
+        var clave = prompt("Pegue la clave secreta de Stripe (empieza por sk_test_ o sk_live_):");
+        if (!clave) return;
+        fetch(AGENDA_URL, { method: "POST", body: JSON.stringify({ k: AGENDA_CLAVE, action: "configurar-stripe", clave: clave.trim() }) })
+          .then(function (r) { return r.json(); })
+          .then(function (r) { alert(r && r.success ? "Stripe configurado." : ("No se pudo configurar: " + ((r && r.error) || "sin respuesta"))); })
+          .catch(function () { alert("No se pudo avisar a la tienda online."); });
+      } else if (a === "configurar-paypal") {
+        var cid = prompt("Pegue el Client ID de PayPal:");
+        if (!cid) return;
+        var sec = prompt("Pegue el Secret de PayPal:");
+        if (!sec) return;
+        var modo = prompt("Modo: sandbox o live", "sandbox");
+        fetch(AGENDA_URL, { method: "POST", body: JSON.stringify({ k: AGENDA_CLAVE, action: "configurar-paypal", clientId: cid.trim(), secret: sec.trim(), modo: (modo || "sandbox").trim() }) })
+          .then(function (r) { return r.json(); })
+          .then(function (r) { alert(r && r.success ? "PayPal configurado." : ("No se pudo configurar: " + ((r && r.error) || "sin respuesta"))); })
+          .catch(function () { alert("No se pudo avisar a la tienda online."); });
+      }
+      else if (a === "pedidos-actualizar") { pedidosTienda = null; errorPedidos = ""; pintar(); }
+      else if (a === "pedido-entregado") {
+        var pedido = (pedidosTienda || []).filter(function (x) { return x.id === id; })[0];
+        if (!pedido || pedido.estado === "entregado" || pedido.estado === "anulado") return;
+        var yaPagado = pedido.estado === "pagado";
+        fetch(AGENDA_URL, { method: "POST", body: JSON.stringify({ k: AGENDA_CLAVE, action: "pedido-estado", id: id, estado: "entregado" }) })
+          .then(function (r) { return r.json(); })
+          .then(function (r) {
+            if (!r || !r.success) { alert("No se pudo cerrar el pedido: " + ((r && r.error) || "sin respuesta")); return; }
+            (pedido.items || []).forEach(function (it) {
+              var p = productoPorId(it.id);
+              if (p) p.stock = Math.max(0, (Number(p.stock) || 0) - (Number(it.cantidad) || 1));
+            });
+            if (!cobroDePedido(pedido.id)) registrarCobro({
+              fecha: hoyISO(), clienteNombre: pedido.nombre || "Pedido tienda",
+              concepto: "Pedido tienda", tipo: "producto", importe: Number(pedido.total) || 0,
+              pago: yaPagado ? (pedido.pagoOnline || "stripe") : (pedido.pago || "efectivo"), pedidoId: pedido.id, origen: "manual"
+            });
+            publicarProductos();
+            guardar();
+            pedidosTienda = null;
+            alert(yaPagado ? "Pedido entregado." : "Pedido entregado y cobrado.");
+            pintar();
+          })
+          .catch(function () { alert("No se pudo avisar a la tienda online."); });
+      } else if (a === "pedido-comprobar-pago") {
+        fetch(AGENDA_URL, { method: "POST", body: JSON.stringify({ k: AGENDA_CLAVE, action: "verificar-pago", id: id }) })
+          .then(function (r) { return r.json(); })
+          .then(function (r) {
+            if (!r || !r.success) { alert("No se pudo comprobar: " + ((r && r.error) || "sin respuesta")); return; }
+            var pedido = (pedidosTienda || []).filter(function (x) { return x.id === id; })[0];
+            if (pedido) pedido.estado = r.pagado ? "pagado" : (r.estado || pedido.estado);
+            alert(r.pagado ? "Pago confirmado." : "El pago todavía no se ha confirmado.");
+            pintar();
+          })
+          .catch(function () { alert("No se pudo comprobar el pago."); });
+      } else if (a === "pedido-anulado") {
+        if (!confirm("¿Anular este pedido?")) return;
+        fetch(AGENDA_URL, { method: "POST", body: JSON.stringify({ k: AGENDA_CLAVE, action: "pedido-estado", id: id, estado: "anulado" }) })
+          .then(function (r) { return r.json(); })
+          .then(function () { pedidosTienda = null; pintar(); })
+          .catch(function () { alert("No se pudo avisar a la tienda online."); });
+      } else if (a === "historial-cliente") historialCliente(clientePorId(id));
+      else if (a === "dia-antes") { dia = moverDia(dia, -1); pintar(); pedirOcupacion(dia); }
+      else if (a === "dia-despues") { dia = moverDia(dia, 1); pintar(); pedirOcupacion(dia); }
+      else if (a === "dia-hoy") { dia = hoyISO(); pintar(); pedirOcupacion(dia); }
+      else if (a === "ir-proxima") { dia = b.getAttribute("data-fecha") || dia; pintar(); pedirOcupacion(dia); }
+      else if (a === "actualizar-web") { pedirOcupacion(dia, true); pintar(); }
+      else if (a === "anotar-ocupado") {
+        formCita({ fecha: dia, hora: b.getAttribute("data-hora"), estado: "pendiente", pago: "efectivo", precio: "", notas: "" });
+      }
+      else if (a === "nuevo-cliente") formCliente(null);
+      else if (a === "editar-cliente") formCliente(clientePorId(id));
+      else if (a === "borrar-cliente") {
+        if (confirm("¿Borrar este cliente? Sus citas se conservan.")) {
+          datos.clientes = datos.clientes.filter(function (x) { return x.id !== id; });
+          guardar(); pintar();
+        }
+      } else if (a === "nuevo-servicio") formServicio(null);
+      else if (a === "editar-servicio") formServicio(servicioPorId(id));
+      else if (a === "borrar-servicio") {
+        if (confirm("¿Borrar este servicio?")) {
+          datos.servicios = datos.servicios.filter(function (x) { return x.id !== id; });
+          guardar(); pintar();
+        }
+      } else if (a === "exportar") exportarCopia();
+      else if (a === "exportar-dia") exportarDia();
+      else if (a === "guardar-contacto") {
+        datos.salon = (document.getElementById("nombre-salon").value || "").trim() || "Yoselin Magia y Color";
+        datos.contacto = datos.contacto || contactoInicial();
+        datos.contacto.telefono = document.getElementById("contacto-telefono").value.trim();
+        datos.contacto.correo = document.getElementById("contacto-correo").value.trim();
+        datos.contacto.direccion = document.getElementById("contacto-direccion").value.trim();
+        datos.contacto.web = document.getElementById("contacto-web").value.trim();
+        datos.contacto.reservas = document.getElementById("contacto-reservas").value.trim();
+        datos.contacto.tienda = document.getElementById("contacto-tienda").value.trim();
+        guardar(); pintar();
+      } else if (a === "abrir-reservas") abrirReservas();
+      else if (a === "copiar-reservas") copiarReservas();
+      else if (a === "copiar-tienda") copiarTienda();
+      else if (a === "vaciar") {
+        if (confirm("Esto borra clientes, citas y servicios. ¿Seguro?") && confirm("Última vez: no se puede deshacer. ¿Continuar?")) {
+          datos = datosIniciales(); guardar(); pintar();
+        }
+      } else if (a === "tab-copias") { vista = "datos"; pintar(); }
+    };
+  });
+
+  var buscador = document.getElementById("buscador-cliente");
+  if (buscador) {
+    buscador.oninput = function () {
+      window._buscarCliente = buscador.value;
+      var pos = buscador.selectionStart;
+      pintar();
+      var b2 = document.getElementById("buscador-cliente");
+      if (b2) { b2.focus(); b2.setSelectionRange(pos, pos); }
+    };
+  }
+
+  var archivo = document.getElementById("archivo-copia");
+  if (archivo) {
+    archivo.onchange = function () {
+      var f = archivo.files && archivo.files[0];
+      if (!f) return;
+      var lector = new FileReader();
+      lector.onload = function () {
+        try {
+          var nuevo = JSON.parse(lector.result);
+          if (!nuevo || !Array.isArray(nuevo.citas)) throw new Error("formato");
+          if (!confirm("Se sustituirán los datos actuales por los de la copia. ¿Seguir?")) return;
+          datos = nuevo;
+          if (!datos.clientes) datos.clientes = [];
+          if (!datos.servicios || !datos.servicios.length) datos.servicios = datosIniciales().servicios;
+          guardar(); pintar();
+          alert("Copia restaurada: " + datos.citas.length + " citas y " + datos.clientes.length + " clientes.");
+        } catch (e) {
+          alert("Ese archivo no parece una copia válida del programa.");
+        }
+      };
+      lector.readAsText(f);
+    };
+  }
+
+  // rellenar el precio al elegir servicio
+  var selServicio = document.querySelector('select[name="servicioId"]');
+  if (selServicio) {
+    selServicio.onchange = function () {
+      var op = selServicio.options[selServicio.selectedIndex];
+      var precio = op ? op.getAttribute("data-precio") : "";
+      var campo = document.querySelector('input[name="precio"]');
+      if (campo && precio && !campo.value) campo.value = precio;
+    };
+  }
+
+  // elegir un cliente guardado rellena su nombre
+  var selCliente = document.querySelector('select[name="clienteId"]');
+  if (selCliente) {
+    selCliente.onchange = function () {
+      var c = clientePorId(selCliente.value);
+      var nombre = document.querySelector('input[name="clienteNombre"]');
+      var tel = document.querySelector('input[name="clienteTelefono"]');
+      if (c && nombre) nombre.value = c.nombre;
+      if (c && tel) tel.value = c.telefono || "";
+    };
+  }
+}
+
+/* ---------- arranque ---------- */
+document.querySelectorAll("nav button").forEach(function (b) {
+  b.onclick = function () {
+    vista = b.getAttribute("data-tab");
+    pintar();
+  };
+});
+
+document.addEventListener("keydown", function (ev) {
+  if (ev.key === "Escape") {
+    var dlg = document.getElementById("dialogo");
+    if (dlg.open) dlg.close();
+  }
+});
+
+cargar();
+// si el dia en pantalla esta vacio, abrir el primero que tenga cita
+if (dia < hoyISO()) dia = hoyISO();
+if (!citasDelDia(dia).length) {
+  var cercana = proximaCita();
+  if (cercana) dia = cercana.fecha;
+}
+pintar();
+pedirOcupacion(dia);
+</script>
+<script>
+(function () {
+  var CLAVE_TEMA = "peluqueria-tema";
+  var boton = document.getElementById("boton-tema");
+  function pintar(oscuro) {
+    document.documentElement.setAttribute("data-tema", oscuro ? "oscuro" : "claro");
+    if (boton) boton.textContent = oscuro ? "Modo claro" : "Modo oscuro";
+  }
+  var oscuro = false;
+  try { oscuro = localStorage.getItem(CLAVE_TEMA) === "oscuro"; } catch (e) {}
+  pintar(oscuro);
+  if (boton) {
+    boton.addEventListener("click", function () {
+      oscuro = !oscuro;
+      try { localStorage.setItem(CLAVE_TEMA, oscuro ? "oscuro" : "claro"); } catch (e) {}
+      pintar(oscuro);
+    });
+  }
+})();
+</script>
+<script>
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () {
+    navigator.serviceWorker.register("sw.js").catch(function () {});
+  });
+}
+</script>
+</body>
+</html>
