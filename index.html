@@ -393,7 +393,27 @@ try {
 
 /* ---------- agenda compartida con Google (aplicacion web del salon) ---------- */
 var AGENDA_URL = "https://script.google.com/macros/s/AKfycbzAjiTVp5Kpsoel0PsJoQd_T3xwjq-GYZAP6Z8q26m_vWByfAgpmlDTkNJoIrreiaqmyg/exec";
-var AGENDA_CLAVE = "luz-pelu-2026";
+/* La contraseña del salón NO va escrita en esta página: se pide una vez en cada
+   aparato y se guarda en ese navegador. Así la página se puede publicar sin
+   publicar la llave. */
+var CLAVE_GUARDADA_AGENDA = "peluqueria-clave-agenda";
+function leerClaveAgenda() {
+  try { return localStorage.getItem(CLAVE_GUARDADA_AGENDA) || ""; } catch (e) { return ""; }
+}
+function guardarClaveAgenda(v) {
+  try { if (v) localStorage.setItem(CLAVE_GUARDADA_AGENDA, v); else localStorage.removeItem(CLAVE_GUARDADA_AGENDA); } catch (e) {}
+}
+var AGENDA_CLAVE = leerClaveAgenda();
+function preguntarClaveAgenda(forzar) {
+  if (!forzar && AGENDA_CLAVE) return true;
+  var v = window.prompt("Contraseña del salón (solo se pide una vez en cada aparato):");
+  if (v === null) return false;
+  v = String(v).trim();
+  if (!v) return false;
+  AGENDA_CLAVE = v;
+  guardarClaveAgenda(v);
+  return true;
+}
 var eventosGoogle = {};
 var cargandoGoogle = {};
 var errorGoogle = {};
@@ -407,7 +427,10 @@ function pedirGoogle(fecha) {
     .then(function (r) {
       cargandoGoogle[fecha] = false;
       if (r && r.success) eventosGoogle[fecha] = r.citas || [];
-      else errorGoogle[fecha] = (r && r.error) || "La agenda de Google no contesto.";
+      else {
+        errorGoogle[fecha] = (r && r.error) || "La agenda de Google no contesto.";
+        if (r && /permiso/i.test(String(r.error || ""))) guardarClaveAgenda("");
+      }
       if (vista === "agenda" && dia === fecha) pintar();
     })
     .catch(function () {
@@ -840,6 +863,7 @@ function htmlTienda() {
     '<button class="btn2" data-accion="publicar-productos">Publicar catálogo</button>' +
     '<button class="btn2" data-accion="configurar-stripe">Configurar Stripe</button>' +
     '<button class="btn2" data-accion="configurar-paypal">Configurar PayPal</button>' +
+    '<button class="btn2" data-accion="cambiar-clave">Contraseña del salón</button>' +
     '<button class="btn2" data-accion="abrir-tienda">Ver tienda online</button>' +
     '<button class="btn" data-accion="nuevo-producto">Nuevo producto</button></div>' +
     '<div class="rejilla">' +
@@ -1345,6 +1369,8 @@ function enganchar() {
           .then(function (r) { return r.json(); })
           .then(function (r) { alert(r && r.success ? "PayPal configurado." : ("No se pudo configurar: " + ((r && r.error) || "sin respuesta"))); })
           .catch(function () { alert("No se pudo avisar a la tienda online."); });
+      } else if (a === "cambiar-clave") {
+        if (preguntarClaveAgenda(true)) { alert("Contraseña guardada en este aparato."); pintar(); }
       }
       else if (a === "pedidos-actualizar") { pedidosTienda = null; errorPedidos = ""; pintar(); }
       else if (a === "pedido-entregado") {
@@ -1509,6 +1535,7 @@ document.addEventListener("keydown", function (ev) {
 });
 
 cargar();
+preguntarClaveAgenda();
 // si el dia en pantalla esta vacio, abrir el primero que tenga cita
 if (dia < hoyISO()) dia = hoyISO();
 if (!citasDelDia(dia).length) {
